@@ -1,0 +1,89 @@
+# ============================================
+# Local Zsh Configuration Example
+# ============================================
+# This file contains examples of machine-specific settings.
+# Copy this file to ~/.zshrc.local and customize for your machine:
+#
+#   cp ~/Projects/dotfiles/home/.zshrc.local.example ~/.zshrc.local
+#
+# Note: .zshrc.local is ignored by git and will not be synced.
+
+# ============================================
+# Custom PATH Additions
+# ============================================
+
+# Antigravity (if installed)
+# export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
+
+# OpenCode (if installed)
+# export PATH="$HOME/.opencode/bin:$PATH"
+
+# Custom local bin
+# export PATH="$HOME/.local/bin:$PATH"
+
+# ============================================
+# Tool-Specific Configurations
+# ============================================
+
+# OpenClaw Completion (if installed)
+# if command -v openclaw &> /dev/null; then
+#   source <(openclaw completion --shell zsh)
+# fi
+
+# Tmux Claude Code Sessions (if using custom tmux setup)
+# alias code-tmux="$HOME/.tmux/scripts/code.sh"
+# alias code-here="$HOME/.tmux/scripts/code-here.sh"
+
+# ============================================
+# Environment Variables
+# ============================================
+
+# API Keys and Credentials (NEVER commit these!)
+# export OPENAI_API_KEY="your-key-here"
+# export ANTHROPIC_API_KEY="your-key-here"
+
+# ============================================
+# Machine-Specific Aliases
+# ============================================
+
+# Work-specific shortcuts
+# alias work="cd $HOME/Work"
+
+# Server shortcuts
+# alias myserver="ssh user@example.com"
+
+# Docker shortcuts (if using Docker)
+# alias dps="docker ps"
+# alias dimg="docker images"
+
+# ============================================
+# Project-Specific Settings
+# ============================================
+
+# Node.js version management (if using nvm instead of fnm)
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Python virtual environment
+# export WORKON_HOME="$HOME/.virtualenvs"
+
+# Go development
+# export GOPATH="$HOME/go"
+# export PATH="$GOPATH/bin:$PATH"
+
+# Rust development
+# export PATH="$HOME/.cargo/bin:$PATH"
+
+# ============================================
+# macOS-Specific Settings
+# ============================================
+
+# Homebrew (Apple Silicon Mac)
+# if [[ $(uname -m) == "arm64" ]]; then
+#   eval "$(/opt/homebrew/bin/brew shellenv)"
+# fi
+
+# Homebrew (Intel Mac)
+# if [[ $(uname -m) == "x86_64" ]]; then
+#   eval "$(/usr/local/bin/brew shellenv)"
+# fi

@@ -1,0 +1,55 @@
+[user]
+	name = nukeguys
+	email = nukeguys0@gmail.com
+
+[init]
+	defaultBranch = main
+
+[core]
+	precomposeunicode = true
+  quotepath = false
+
+# commit editor에 변경사항 표시
+[commit]
+	verbose = true
+
+[alias]
+s = status
+a = !git add . && git status
+c = commit
+cm = commit -m
+ca = commit --amend # careful
+l = log --graph --all --pretty=format:'%C(yellow)%h%C(cyan)%d%Creset %s %C(white)- %an, %ar%Creset'
+ll = log --stat --abbrev-commit
+lg = log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+llg = log --color --graph --pretty=format:'%C(bold white)%H %d%Creset%n%s%n%+b%C(bold blue)%an <%ae>%Creset %C(bold green)%cr (%ci)' --abbrev-commit
+d = diff
+lgdiff = "!f() { git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit $1..$2;}; f"
+gdiff = "!f() { git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit $1..$2;}; f"
+lgraph = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+branch-name = !git rev-parse --abbrev-ref HEAD
+publish = !git push -u origin $(git branch-name)
+rm-remote = "!f() { git push origin --no-verify :$1; }; f"
+rb = "!f() { git branch -D $(git branch | grep -E $1); }; f"
+rt = "!f() { git tag -d $(git tag -l $1); }; f"
+rrt = "!f() { git push origin --no-verify -d $(git tag -l $1); }; f"
+alias = "!# Prints all aliases.;\n\
+    git config --list \
+    | egrep '^alias.+' \
+    | sed -e 's/^alias\\.//' \
+    | sed -e 's/^[^=]*=/\\'$'\\033[31m&\\033[(B\\033[m/' \
+    | column -t -s'=' \
+    | sed 's/!#* *//; s/;$//' \
+    | cut -c1-85"
+cb = switch -c
+# rmb = "!f() { git branch -vv | grep 'origin/.*: gone]' | awk '{print $1}' | xargs git branch -d; }; f"
+rmb = "!f() { git branch -vv | awk '/origin\\/.*: gone]/ {print $1}' | xargs git branch -D; }; f"
+ch = "!git checkout $(git branch -vv | grep -v '^\\*' | fzf | awk '{print $1}')"
+mg = "!git merge $(git branch -vv | grep -v '^\\*' | fzf | awk '{print $1}')"
+chp = "!git checkout $(git bselect)"
+bselect = "!# select branch with preview;\n\
+        f() { \
+            _height=$(stty size | awk '{print $1}');\
+            git branch | egrep -v '^\\*' | fzf --preview \"git l {1} | head -n $_height\"; \
+        }; f"
+

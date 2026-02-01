@@ -1,0 +1,10 @@
+# SSH Config Template
+# Copy this file to ~/.ssh/config and customize for your machine
+
+# Example configuration:
+# Host example
+#     HostName example.com
+#     User your-username
+#     IdentityFile ~/.ssh/id_ed25519
+#     Port 22
+
