@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/kkick/Projects/dotfiles log --oneline -20)",
+      "Bash(du:*)",
+      "Bash(git -C /Users/kkick/Projects/dotfiles log --all --oneline)",
+      "Bash(chmod:*)",
+      "Bash(./backup.sh:*)",
+      "Bash(tree:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(ln:*)"
+    ]
+  }
+}

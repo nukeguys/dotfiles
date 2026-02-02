@@ -3,13 +3,9 @@
 .AppleDouble
 .LSOverride
 
-# 민감한 정보
-ssh/config                    # 실제 SSH config (템플릿만 커밋)
-claude/.claude.json          # 사용자 계정 정보 (선택적)
-
 # Claude Code 제외
 **/.credentials.json         # OAuth 토큰
-**/plugins/                  # 4.9MB (자동 다운로드됨)
+**/plugins/                  # 자동 다운로드됨
 **/projects/                 # 세션 데이터
 **/cache/
 **/debug/
@@ -20,16 +16,8 @@ claude/.claude.json          # 사용자 계정 정보 (선택적)
 **/shell-snapshots/
 **/stats-cache.json
 **/todos/
+**/ide/
 
-# Vim/Neovim 임시 파일
-*.swp
-*.swo
-*~
-
-# Zsh 컴파일 파일
-*.zwc
-.zcompdump*
-
-# 로컬 설정 (컴퓨터별 설정 파일)
-*.local                       # .zshrc.local, .bashrc.local 등
+# 로컬 설정
+*.local
 *.private
