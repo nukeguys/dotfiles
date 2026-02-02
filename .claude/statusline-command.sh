@@ -10,7 +10,6 @@ purple='\033[38;5;141m'
 green='\033[38;5;114m'
 yellow='\033[38;5;220m'
 grey='\033[38;5;240m'
-cyan='\033[38;5;159m'
 reset='\033[0m'
 
 # Icon set selection: nerd (default), unicode, none
@@ -30,7 +29,7 @@ case "$ICON_SET" in
     icon_branch=''
     icon_model=''
     icon_context=''
-    icon_cost='$'
+    icon_cost=''
     ;;
   *)  # nerd (default)
     icon_folder='󰉋'
@@ -41,14 +40,15 @@ case "$ICON_SET" in
     ;;
 esac
 
-# Get data from JSON
-cwd=$(echo "$input" | jq -r '.workspace.current_dir // empty')
-model=$(echo "$input" | jq -r '.model.display_name // empty')
-total_input=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
-total_output=$(echo "$input" | jq -r '.context_window.total_output_tokens // 0')
-context_size=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
-used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // 0')
-cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+# Get all data from JSON in a single jq call
+eval "$(echo "$input" | jq -r '
+  @sh "cwd=\(.workspace.current_dir // empty)",
+  @sh "model=\(.model.display_name // empty)",
+  @sh "total_tokens=\((.context_window.total_input_tokens // 0) + (.context_window.total_output_tokens // 0))",
+  @sh "context_size=\(.context_window.context_window_size // 200000)",
+  @sh "used_pct=\(.context_window.used_percentage // 0)",
+  @sh "cost=\(.cost.total_cost_usd // 0)"
+')"
 
 # Fallback for cwd
 if [ -z "$cwd" ] || [ "$cwd" = "null" ]; then
@@ -104,13 +104,10 @@ if [ -n "$model" ] && [ "$model" != "null" ]; then
 fi
 
 # Context usage
-if [ "$context_size" -gt 0 ] && [ "$context_size" != "null" ]; then
-  total_tokens=$((total_input + total_output))
+if [ "$context_size" -gt 0 ] 2>/dev/null; then
   tokens_k=$((total_tokens / 1000))
   context_k=$((context_size / 1000))
-
-  # Calculate percentage directly from tokens
-  pct=$((total_tokens * 100 / context_size))
+  pct=${used_pct%.*}  # Remove decimal part
 
   output="${output} ${grey}│${reset} ${green}${icon_context} ${tokens_k}k/${context_k}k (${pct}%)${reset}"
 fi
@@ -118,7 +115,11 @@ fi
 # Cost
 if [ -n "$cost" ] && [ "$cost" != "null" ] && [ "$cost" != "0" ]; then
   cost_fmt=$(printf "%.2f" "$cost" 2>/dev/null || echo "0.00")
-  output="${output} ${grey}│${reset} ${yellow}${icon_cost} \$${cost_fmt}${reset}"
+  if [ -n "$icon_cost" ]; then
+    output="${output} ${grey}│${reset} ${yellow}${icon_cost} \$${cost_fmt}${reset}"
+  else
+    output="${output} ${grey}│${reset} ${yellow}\$${cost_fmt}${reset}"
+  fi
 fi
 
 printf "%b" "$output"
