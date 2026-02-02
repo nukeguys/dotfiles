@@ -17,7 +17,3 @@
 **/stats-cache.json
 **/todos/
 **/ide/
-
-# 로컬 설정
-*.local
-*.private
