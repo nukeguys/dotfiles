@@ -13,12 +13,33 @@ grey='\033[38;5;240m'
 cyan='\033[38;5;159m'
 reset='\033[0m'
 
-# Icons (Nerd Font)
-icon_folder='󰉋'
-icon_branch=''
-icon_model='󰘦'
-icon_context=''
-icon_cost='󰄀'
+# Icon set selection: nerd (default), unicode, none
+# Set via: export CLAUDE_STATUSLINE_ICONS=unicode
+ICON_SET="${CLAUDE_STATUSLINE_ICONS:-nerd}"
+
+case "$ICON_SET" in
+  unicode)
+    icon_folder='📁'
+    icon_branch='⎇'
+    icon_model='🤖'
+    icon_context='📊'
+    icon_cost='💰'
+    ;;
+  none)
+    icon_folder=''
+    icon_branch=''
+    icon_model=''
+    icon_context=''
+    icon_cost='$'
+    ;;
+  *)  # nerd (default)
+    icon_folder='󰉋'
+    icon_branch=''
+    icon_model='󰘦'
+    icon_context=''
+    icon_cost='󰄀'
+    ;;
+esac
 
 # Get data from JSON
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // empty')

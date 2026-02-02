@@ -45,8 +45,25 @@ ls -la ~/.claude/statusline-command.sh
 # Claude Code 재시작하여 statusline 확인
 ```
 
+## 아이콘 설정
+
+기본적으로 Nerd Font 아이콘을 사용합니다. 터미널에서 아이콘이 깨지는 경우 환경변수로 아이콘 세트를 변경할 수 있습니다:
+
+```bash
+# ~/.zshrc 또는 ~/.bashrc에 추가
+export CLAUDE_STATUSLINE_ICONS=unicode  # 이모지 사용
+# 또는
+export CLAUDE_STATUSLINE_ICONS=none     # 아이콘 없음
+```
+
+| 옵션 | 설명 | 예시 |
+|------|------|------|
+| `nerd` (기본) | Nerd Font 아이콘 | 󰉋  󰘦  󰄀 |
+| `unicode` | 이모지 | 📁 ⎇ 🤖 📊 💰 |
+| `none` | 텍스트만 | (아이콘 없음) |
+
 ## 주의사항
 
 - `.credentials.json` 파일은 절대 커밋하지 마세요 (OAuth 토큰 포함)
-- statusline 스크립트는 [Nerd Font](https://www.nerdfonts.com/)가 설치되어 있어야 아이콘이 정상 표시됩니다
+- `nerd` 아이콘 세트는 [Nerd Font](https://www.nerdfonts.com/)가 설치되어 있어야 정상 표시됩니다
 - `jq` 명령어가 필요합니다 (`brew install jq`)
