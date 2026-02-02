@@ -1,0 +1,23 @@
+# Ghostty Terminal Configuration
+# https://ghostty.org/docs/config
+
+# Theme & Appearance
+theme = "Snazzy"
+background-opacity = 0.9
+background-blur-radius = 2
+
+# Font
+font-family = "MesloLGS Nerd Font"
+font-family = "Noto Sans KR"
+
+# Window
+window-padding-x = 12
+window-padding-y = 10
+
+# Scrollback
+scrollback-limit = 100000
+
+# Terminal
+term = xterm-256color
+shell-integration = none
+shell-integration-features = false
