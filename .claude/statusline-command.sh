@@ -9,7 +9,9 @@ orange='\033[38;5;208m'
 purple='\033[38;5;141m'
 green='\033[38;5;114m'
 yellow='\033[38;5;220m'
+red='\033[38;5;203m'
 grey='\033[38;5;240m'
+cyan='\033[38;5;81m'
 reset='\033[0m'
 
 # Icon set selection: nerd (default), unicode, none
@@ -23,6 +25,7 @@ case "$ICON_SET" in
     icon_model='🤖'
     icon_context='📊'
     icon_cost='💰'
+    icon_style='✏️'
     ;;
   none)
     icon_folder=''
@@ -30,6 +33,7 @@ case "$ICON_SET" in
     icon_model=''
     icon_context=''
     icon_cost=''
+    icon_style=''
     ;;
   *)  # nerd (default)
     icon_folder='󰉋'
@@ -37,6 +41,7 @@ case "$ICON_SET" in
     icon_model='󰘦'
     icon_context=''
     icon_cost='󰄀'
+    icon_style='󰦨'
     ;;
 esac
 
@@ -44,10 +49,12 @@ esac
 eval "$(echo "$input" | jq -r '
   @sh "cwd=\(.workspace.current_dir // empty)",
   @sh "model=\(.model.display_name // empty)",
-  @sh "total_tokens=\((.context_window.total_input_tokens // 0) + (.context_window.total_output_tokens // 0))",
+  @sh "input_tokens=\(.context_window.total_input_tokens // 0)",
+  @sh "output_tokens=\(.context_window.total_output_tokens // 0)",
   @sh "context_size=\(.context_window.context_window_size // 200000)",
   @sh "used_pct=\(.context_window.used_percentage // 0)",
-  @sh "cost=\(.cost.total_cost_usd // 0)"
+  @sh "cost=\(.cost.total_cost_usd // 0)",
+  @sh "output_style=\(.output_style.name // empty)"
 ')"
 
 # Fallback for cwd
@@ -103,22 +110,52 @@ if [ -n "$model" ] && [ "$model" != "null" ]; then
   output="${output} ${grey}│${reset} ${purple}${icon_model} ${model}${reset}"
 fi
 
-# Context usage
+# Output style
+if [ -n "$output_style" ] && [ "$output_style" != "null" ]; then
+  if [ -n "$icon_style" ]; then
+    output="${output} ${grey}│${reset} ${cyan}${icon_style} ${output_style}${reset}"
+  else
+    output="${output} ${grey}│${reset} ${cyan}${output_style}${reset}"
+  fi
+fi
+
+# Context usage with color based on percentage
 if [ "$context_size" -gt 0 ] 2>/dev/null; then
-  tokens_k=$((total_tokens / 1000))
+  input_k=$((input_tokens / 1000))
+  output_k=$((output_tokens / 1000))
   context_k=$((context_size / 1000))
   pct=${used_pct%.*}  # Remove decimal part
 
-  output="${output} ${grey}│${reset} ${green}${icon_context} ${tokens_k}k/${context_k}k (${pct}%)${reset}"
+  # Color based on usage percentage
+  if [ "$pct" -ge 80 ]; then
+    ctx_color="$red"
+  elif [ "$pct" -ge 50 ]; then
+    ctx_color="$yellow"
+  else
+    ctx_color="$green"
+  fi
+
+  output="${output} ${grey}│${reset} ${ctx_color}${icon_context} ${input_k}k↓ ${output_k}k↑ (${pct}%)${reset}"
 fi
 
-# Cost
+# Cost with color based on amount
 if [ -n "$cost" ] && [ "$cost" != "null" ] && [ "$cost" != "0" ]; then
   cost_fmt=$(printf "%.2f" "$cost" 2>/dev/null || echo "0.00")
-  if [ -n "$icon_cost" ]; then
-    output="${output} ${grey}│${reset} ${yellow}${icon_cost} \$${cost_fmt}${reset}"
+
+  # Color based on cost (thresholds: $0.50, $2.00)
+  cost_cents=$(printf "%.0f" "$(echo "$cost * 100" | bc 2>/dev/null || echo "0")")
+  if [ "$cost_cents" -ge 200 ]; then
+    cost_color="$red"
+  elif [ "$cost_cents" -ge 50 ]; then
+    cost_color="$orange"
   else
-    output="${output} ${grey}│${reset} ${yellow}\$${cost_fmt}${reset}"
+    cost_color="$yellow"
+  fi
+
+  if [ -n "$icon_cost" ]; then
+    output="${output} ${grey}│${reset} ${cost_color}${icon_cost} \$${cost_fmt}${reset}"
+  else
+    output="${output} ${grey}│${reset} ${cost_color}\$${cost_fmt}${reset}"
   fi
 fi
 
