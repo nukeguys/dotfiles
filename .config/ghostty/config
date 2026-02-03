@@ -7,8 +7,8 @@ background-opacity = 0.9
 background-blur-radius = 2
 
 # Font
-font-family = "MesloLGS Nerd Font"
-font-family = "Noto Sans KR"
+font-family = "Meslo LGS NF"
+font-family = "Noto Sans CJK KR"
 
 # Window
 window-padding-x = 12
