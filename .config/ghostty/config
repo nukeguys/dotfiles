@@ -2,13 +2,13 @@
 # https://ghostty.org/docs/config
 
 # Theme & Appearance
-theme = "Snazzy"
+theme = "Snazzy Soft"
 background-opacity = 0.9
 background-blur-radius = 2
 
 # Font
-font-family = "MesloLGS Nerd Font"
-font-family = "Noto Sans KR"
+font-family = "MesloLGS NF"
+font-family = "Noto Sans CJK KR"
 
 # Window
 window-padding-x = 12
