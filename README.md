@@ -23,25 +23,28 @@ cd ~/Projects/dotfiles
 
 Claude Code 전역 설정 파일들입니다.
 
-| 파일 | 설명 |
-|------|------|
-| `settings.json` | 전역 설정 (커스텀 statusline 활성화) |
-| `statusline-command.sh` | 커스텀 statusline 스크립트 |
+| 파일                    | 설명                                 |
+| ----------------------- | ------------------------------------ |
+| `settings.json`         | 전역 설정 (커스텀 statusline 활성화) |
+| `statusline-command.sh` | 커스텀 statusline 스크립트           |
 
 **Statusline 표시 정보:**
+
 - 현재 디렉토리
 - Git 브랜치 및 상태 (dirty, ahead/behind)
 - 사용 중인 모델
 - Output style
 - 컨텍스트 사용량 (입력/출력 토큰 분리, 사용률에 따른 색상 변화)
 - 비용 (금액에 따른 색상 변화)
+- 세션 블록 남은 시간 (`bunx ccusage` 사용, 30초 캐싱)
 
 **색상 표시:**
 
-| 구분 | 초록 | 노랑 | 주황 | 빨강 |
-|------|------|------|------|------|
-| 컨텍스트 | 0-49% | 50-79% | - | 80%+ |
-| 비용 | - | $0.50 미만 | $0.50-$1.99 | $2.00+ |
+| 구분           | 초록  | 노랑       | 주황        | 빨강    |
+| -------------- | ----- | ---------- | ----------- | ------- |
+| 컨텍스트       | 0-49% | 50-79%     | -           | 80%+    |
+| 비용           | -     | $0.50 미만 | $0.50-$1.99 | $2.00+  |
+| 블록 남은 시간 | 2h+   | 1h-2h      | -           | 1h 미만 |
 
 **아이콘 설정:**
 
@@ -52,24 +55,25 @@ export CLAUDE_STATUSLINE_ICONS=unicode  # 이모지 사용
 export CLAUDE_STATUSLINE_ICONS=none     # 아이콘 없음
 ```
 
-| 옵션 | 설명 | 예시 |
-|------|------|------|
-| `nerd` (기본) | Nerd Font 아이콘 | 󰉋  󰘦  󰄀 |
-| `unicode` | 이모지 | 📁 ⎇ 🤖 📊 💰 |
-| `none` | 텍스트만 | (아이콘 없음) |
+| 옵션          | 설명             | 예시          |
+| ------------- | ---------------- | ------------- |
+| `nerd` (기본) | Nerd Font 아이콘 | 󰉋 󰘦 󰄀         |
+| `unicode`     | 이모지           | 📁 ⎇ 🤖 📊 💰 |
+| `none`        | 텍스트만         | (아이콘 없음) |
 
 ### Ghostty (`.config/ghostty/`)
 
 [Ghostty](https://ghostty.org/) 터미널 에뮬레이터 설정입니다.
 
-| 설정 | 값 |
-|------|------|
-| 테마 | Snazzy |
-| 투명도 | 0.9 |
-| 폰트 | MesloLGS Nerd Font + Noto Sans KR |
-| 스크롤백 | 100,000줄 |
+| 설정     | 값                                |
+| -------- | --------------------------------- |
+| 테마     | Snazzy                            |
+| 투명도   | 0.9                               |
+| 폰트     | MesloLGS Nerd Font + Noto Sans KR |
+| 스크롤백 | 100,000줄                         |
 
 **Symlink 구조:**
+
 ```
 dotfiles/.config/ghostty/config
     ↓ symlink
@@ -93,6 +97,7 @@ ls -la ~/Library/Application\ Support/com.mitchellh.ghostty/config
 ## 의존성
 
 - `jq`: JSON 파싱 (`brew install jq`)
+- `bun`: statusline의 ccusage 블록 정보 표시에 필요 (`brew install oven-sh/bun/bun`)
 - [Nerd Font](https://www.nerdfonts.com/): 아이콘 표시 (선택)
 
 ## 주의사항

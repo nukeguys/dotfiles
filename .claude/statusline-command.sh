@@ -26,6 +26,7 @@ case "$ICON_SET" in
     icon_context='📊'
     icon_cost='💰'
     icon_style='✏️'
+    icon_block='🔥'
     ;;
   none)
     icon_folder=''
@@ -34,6 +35,7 @@ case "$ICON_SET" in
     icon_context=''
     icon_cost=''
     icon_style=''
+    icon_block=''
     ;;
   *)  # nerd (default)
     icon_folder='󰉋'
@@ -42,8 +44,41 @@ case "$ICON_SET" in
     icon_context=''
     icon_cost='󰄀'
     icon_style='󰦨'
+    icon_block='󰔟'
     ;;
 esac
+
+# ccusage blocks cache settings
+CCUSAGE_CACHE_FILE="/tmp/ccusage-blocks-cache.json"
+CCUSAGE_CACHE_TTL="${CCUSAGE_CACHE_TTL:-30}"
+
+get_ccusage_blocks() {
+  # Check if cache file exists and is fresh
+  if [ -f "$CCUSAGE_CACHE_FILE" ]; then
+    cache_age=$(( $(date +%s) - $(stat -f %m "$CCUSAGE_CACHE_FILE" 2>/dev/null || echo 0) ))
+    if [ "$cache_age" -lt "$CCUSAGE_CACHE_TTL" ]; then
+      cat "$CCUSAGE_CACHE_FILE"
+      return 0
+    fi
+  fi
+
+  # Fetch fresh data
+  local result
+  result=$(bunx ccusage blocks --active --json --offline 2>/dev/null)
+  if [ $? -eq 0 ] && [ -n "$result" ]; then
+    echo "$result" > "$CCUSAGE_CACHE_FILE"
+    echo "$result"
+    return 0
+  fi
+
+  # Fallback: return stale cache if available
+  if [ -f "$CCUSAGE_CACHE_FILE" ]; then
+    cat "$CCUSAGE_CACHE_FILE"
+    return 0
+  fi
+
+  return 1
+}
 
 # Get all data from JSON in a single jq call
 eval "$(echo "$input" | jq -r '
@@ -156,6 +191,54 @@ if [ -n "$cost" ] && [ "$cost" != "null" ] && [ "$cost" != "0" ]; then
     output="${output} ${grey}│${reset} ${cost_color}${icon_cost} \$${cost_fmt}${reset}"
   else
     output="${output} ${grey}│${reset} ${cost_color}\$${cost_fmt}${reset}"
+  fi
+fi
+
+# ccusage block info (session time remaining & token usage)
+block_json=$(get_ccusage_blocks 2>/dev/null)
+if [ -n "$block_json" ]; then
+  # Extract active block info
+  eval "$(echo "$block_json" | jq -r '
+    (.blocks // [])[] | select(.isActive == true) |
+    @sh "block_end_time=\(.endTime // empty)",
+    @sh "block_is_active=true"
+  ' 2>/dev/null)"
+
+  if [ "$block_is_active" = "true" ] && [ -n "$block_end_time" ]; then
+    # Calculate remaining time (endTime is UTC with Z suffix)
+    clean_end_time=$(echo "$block_end_time" | sed 's/\.[0-9]*Z$//' | sed 's/Z$//')
+    end_epoch=$(TZ=UTC date -j -f "%Y-%m-%dT%H:%M:%S" "$clean_end_time" +%s 2>/dev/null)
+    now_epoch=$(date +%s)
+
+    if [ -n "$end_epoch" ]; then
+      remaining=$((end_epoch - now_epoch))
+      if [ "$remaining" -gt 0 ]; then
+        remain_h=$((remaining / 3600))
+        remain_m=$(( (remaining % 3600) / 60 ))
+
+        # Format remaining time
+        if [ "$remain_h" -gt 0 ]; then
+          remain_str="${remain_h}h ${remain_m}m"
+        else
+          remain_str="${remain_m}m"
+        fi
+
+        # Color based on remaining time
+        if [ "$remaining" -ge 7200 ]; then
+          block_color="$green"
+        elif [ "$remaining" -ge 3600 ]; then
+          block_color="$yellow"
+        else
+          block_color="$red"
+        fi
+
+        if [ -n "$icon_block" ]; then
+          output="${output} ${grey}│${reset} ${block_color}${icon_block} ${remain_str} left${reset}"
+        else
+          output="${output} ${grey}│${reset} ${block_color}${remain_str} left${reset}"
+        fi
+      fi
+    fi
   fi
 fi
 
