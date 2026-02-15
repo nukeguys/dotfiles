@@ -24,8 +24,8 @@ case "$ICON_SET" in
     icon_branch='⎇'
     icon_model='🤖'
     icon_context='📊'
-    icon_cost='💰'
     icon_style='✏️'
+    icon_mcp='🔌'
     icon_block='🔥'
     ;;
   none)
@@ -33,8 +33,8 @@ case "$ICON_SET" in
     icon_branch=''
     icon_model=''
     icon_context=''
-    icon_cost=''
     icon_style=''
+    icon_mcp=''
     icon_block=''
     ;;
   *)  # nerd (default)
@@ -42,8 +42,8 @@ case "$ICON_SET" in
     icon_branch=''
     icon_model='󰘦'
     icon_context=''
-    icon_cost='󰄀'
     icon_style='󰦨'
+    icon_mcp='󰌘'
     icon_block='󰔟'
     ;;
 esac
@@ -88,7 +88,6 @@ eval "$(echo "$input" | jq -r '
   @sh "output_tokens=\(.context_window.total_output_tokens // 0)",
   @sh "context_size=\(.context_window.context_window_size // 200000)",
   @sh "used_pct=\(.context_window.used_percentage // 0)",
-  @sh "cost=\(.cost.total_cost_usd // 0)",
   @sh "output_style=\(.output_style.name // empty)"
 ')"
 
@@ -145,6 +144,18 @@ if [ -n "$model" ] && [ "$model" != "null" ]; then
   output="${output} ${grey}│${reset} ${purple}${icon_model} ${model}${reset}"
 fi
 
+# MCP server count (global enabled - project disabled)
+mcp_config="$HOME/.claude.json"
+if [ -f "$mcp_config" ]; then
+  mcp_count=$(jq --arg project "$cwd" '
+    ([.mcpServers | to_entries[] | select(.value.disabled != true)] | length) -
+    ([.projects[$project].disabledMcpServers // [] | .[] ] | length)
+  ' "$mcp_config" 2>/dev/null)
+  if [ -n "$mcp_count" ] && [ "$mcp_count" -gt 0 ] 2>/dev/null; then
+    output="${output} ${grey}│${reset} ${green}${icon_mcp} ${mcp_count} MCP Active${reset}"
+  fi
+fi
+
 # Output style
 if [ -n "$output_style" ] && [ "$output_style" != "null" ]; then
   if [ -n "$icon_style" ]; then
@@ -171,27 +182,6 @@ if [ "$context_size" -gt 0 ] 2>/dev/null; then
   fi
 
   output="${output} ${grey}│${reset} ${ctx_color}${icon_context} ${input_k}k↓ ${output_k}k↑ (${pct}%)${reset}"
-fi
-
-# Cost with color based on amount
-if [ -n "$cost" ] && [ "$cost" != "null" ] && [ "$cost" != "0" ]; then
-  cost_fmt=$(printf "%.2f" "$cost" 2>/dev/null || echo "0.00")
-
-  # Color based on cost (thresholds: $0.50, $2.00)
-  cost_cents=$(printf "%.0f" "$(echo "$cost * 100" | bc 2>/dev/null || echo "0")")
-  if [ "$cost_cents" -ge 200 ]; then
-    cost_color="$red"
-  elif [ "$cost_cents" -ge 50 ]; then
-    cost_color="$orange"
-  else
-    cost_color="$yellow"
-  fi
-
-  if [ -n "$icon_cost" ]; then
-    output="${output} ${grey}│${reset} ${cost_color}${icon_cost} \$${cost_fmt}${reset}"
-  else
-    output="${output} ${grey}│${reset} ${cost_color}\$${cost_fmt}${reset}"
-  fi
 fi
 
 # ccusage block info (session time remaining & token usage)
