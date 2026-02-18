@@ -56,9 +56,9 @@ install_claude() {
         fi
     done
 
-    # 글로벌 Claude 설정 (GLOBAL-CLAUDE.md -> ~/.claude/CLAUDE.md)
+    # 글로벌 Claude 설정 (GLOBAL-AGENTS.md -> ~/.claude/CLAUDE.md)
     local claude_md_target="$claude_dir/CLAUDE.md"
-    local claude_md_source="$DOTFILES_DIR/GLOBAL-CLAUDE.md"
+    local claude_md_source="$DOTFILES_DIR/GLOBAL-AGENTS.md"
 
     if [ -f "$claude_md_source" ]; then
         link_file "$claude_md_source" "$claude_md_target"
@@ -97,9 +97,9 @@ install_gemini() {
     local gemini_dir="$HOME/.gemini"
     mkdir -p "$gemini_dir"
 
-    # 글로벌 Gemini 설정 (GLOBAL-CLAUDE.md -> ~/.gemini/GEMINI.md)
+    # 글로벌 Gemini 설정 (GLOBAL-AGENTS.md -> ~/.gemini/GEMINI.md)
     local gemini_md_target="$gemini_dir/GEMINI.md"
-    local gemini_md_source="$DOTFILES_DIR/GLOBAL-CLAUDE.md"
+    local gemini_md_source="$DOTFILES_DIR/GLOBAL-AGENTS.md"
 
     if [ -f "$gemini_md_source" ]; then
         link_file "$gemini_md_source" "$gemini_md_target"
