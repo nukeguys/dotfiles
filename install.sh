@@ -90,6 +90,24 @@ install_ghostty() {
     fi
 }
 
+# Gemini 설정 설치
+install_gemini() {
+    echo -e "\n${GREEN}Installing Gemini settings...${NC}"
+
+    local gemini_dir="$HOME/.gemini"
+    mkdir -p "$gemini_dir"
+
+    # 글로벌 Gemini 설정 (GLOBAL-CLAUDE.md -> ~/.gemini/GEMINI.md)
+    local gemini_md_target="$gemini_dir/GEMINI.md"
+    local gemini_md_source="$DOTFILES_DIR/GLOBAL-CLAUDE.md"
+
+    if [ -f "$gemini_md_source" ]; then
+        link_file "$gemini_md_source" "$gemini_md_target"
+    else
+        echo -e "  ${RED}Not found:${NC} $gemini_md_source"
+    fi
+}
+
 # 사용법 표시
 usage() {
     echo "Usage: ./install.sh [module...]"
@@ -97,12 +115,14 @@ usage() {
     echo "Modules:"
     echo "  claude    Claude Code settings (~/.claude)"
     echo "  ghostty   Ghostty terminal settings (~/.config/ghostty)"
+    echo "  gemini    Gemini settings (~/.gemini)"
     echo "  all       Install all modules (default)"
     echo ""
     echo "Examples:"
     echo "  ./install.sh          # Install all"
     echo "  ./install.sh claude   # Claude Code only"
     echo "  ./install.sh ghostty  # Ghostty only"
+    echo "  ./install.sh gemini   # Gemini only"
 }
 
 # 메인 로직
@@ -117,11 +137,13 @@ main() {
     if [ $# -eq 0 ] || [ "$1" = "all" ]; then
         install_claude
         install_ghostty
+        install_gemini
     else
         for module in "$@"; do
             case "$module" in
                 claude)  install_claude ;;
                 ghostty) install_ghostty ;;
+                gemini)  install_gemini ;;
                 *)
                     echo -e "${RED}Unknown module:${NC} $module"
                     usage
