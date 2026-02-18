@@ -108,6 +108,24 @@ install_gemini() {
     fi
 }
 
+# Codex 설정 설치
+install_codex() {
+    echo -e "\n${GREEN}Installing Codex settings...${NC}"
+
+    local codex_dir="$HOME/.codex"
+    mkdir -p "$codex_dir"
+
+    # 글로벌 Codex 설정 (GLOBAL-AGENTS.md -> ~/.codex/AGENTS.md)
+    local codex_md_target="$codex_dir/AGENTS.md"
+    local codex_md_source="$DOTFILES_DIR/GLOBAL-AGENTS.md"
+
+    if [ -f "$codex_md_source" ]; then
+        link_file "$codex_md_source" "$codex_md_target"
+    else
+        echo -e "  ${RED}Not found:${NC} $codex_md_source"
+    fi
+}
+
 # 사용법 표시
 usage() {
     echo "Usage: ./install.sh [module...]"
@@ -116,6 +134,7 @@ usage() {
     echo "  claude    Claude Code settings (~/.claude)"
     echo "  ghostty   Ghostty terminal settings (~/.config/ghostty)"
     echo "  gemini    Gemini settings (~/.gemini)"
+    echo "  codex     Codex settings (~/.codex)"
     echo "  all       Install all modules (default)"
     echo ""
     echo "Examples:"
@@ -123,6 +142,7 @@ usage() {
     echo "  ./install.sh claude   # Claude Code only"
     echo "  ./install.sh ghostty  # Ghostty only"
     echo "  ./install.sh gemini   # Gemini only"
+    echo "  ./install.sh codex    # Codex only"
 }
 
 # 메인 로직
@@ -138,12 +158,14 @@ main() {
         install_claude
         install_ghostty
         install_gemini
+        install_codex
     else
         for module in "$@"; do
             case "$module" in
                 claude)  install_claude ;;
                 ghostty) install_ghostty ;;
                 gemini)  install_gemini ;;
+                codex)   install_codex ;;
                 *)
                     echo -e "${RED}Unknown module:${NC} $module"
                     usage
