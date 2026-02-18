@@ -7,13 +7,34 @@ DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 기존 설정 백업
+# 기존 설정 백업 (백업 경로를 stdout으로 반환)
 backup_if_exists() {
     if [ -e "$1" ] && [ ! -L "$1" ]; then
-        mv "$1" "$1.backup.$(date +%Y%m%d%H%M%S)"
-        echo -e "${YELLOW}Backed up:${NC} $1"
+        local backup_path="$1.backup.$(date +%Y%m%d%H%M%S)"
+        mv "$1" "$backup_path"
+        echo "$backup_path"
+    fi
+}
+
+# 심링크 생성 (이미 올바른 심링크면 스킵)
+link_file() {
+    local source="$1"
+    local target="$2"
+
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+        echo -e "  ${BLUE}Already linked:${NC} $target"
+        return
+    fi
+
+    local backed_up
+    backed_up=$(backup_if_exists "$target")
+    ln -sf "$source" "$target"
+    echo -e "  ${GREEN}Linked:${NC} $target -> $source"
+    if [ -n "$backed_up" ]; then
+        echo -e "   └${YELLOW} Backed up:${NC} $backed_up"
     fi
 }
 
@@ -29,13 +50,21 @@ install_claude() {
         local source="$DOTFILES_DIR/.claude/$file"
 
         if [ -f "$source" ]; then
-            backup_if_exists "$target"
-            ln -sf "$source" "$target"
-            echo "  Linked: $target -> $source"
+            link_file "$source" "$target"
         else
             echo -e "  ${RED}Not found:${NC} $source"
         fi
     done
+
+    # 글로벌 Claude 설정 (GLOBAL-CLAUDE.md -> ~/.claude/CLAUDE.md)
+    local claude_md_target="$claude_dir/CLAUDE.md"
+    local claude_md_source="$DOTFILES_DIR/GLOBAL-CLAUDE.md"
+
+    if [ -f "$claude_md_source" ]; then
+        link_file "$claude_md_source" "$claude_md_target"
+    else
+        echo -e "  ${RED}Not found:${NC} $claude_md_source"
+    fi
 }
 
 # Ghostty 설정 설치
@@ -51,17 +80,13 @@ install_ghostty() {
 
     # 2. dotfiles -> ~/.config/ghostty/config
     local user_config="$config_dir/config"
-    backup_if_exists "$user_config"
-    ln -sf "$source" "$user_config"
-    echo "  Linked: $user_config -> $source"
+    link_file "$source" "$user_config"
 
     # 3. macOS 앱 설정 경로에 symlink (체인 방식)
     if [ -d "$app_config_dir" ] || [ "$(uname)" = "Darwin" ]; then
         mkdir -p "$app_config_dir"
         local app_config="$app_config_dir/config"
-        backup_if_exists "$app_config"
-        ln -sf "$user_config" "$app_config"
-        echo "  Linked: $app_config -> $user_config"
+        link_file "$user_config" "$app_config"
     fi
 }
 
